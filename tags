@@ -1,0 +1,118 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+BUFSIZE	shell.c	12;"	d	file:
+CC	makefile	/^CC=gcc$/;"	m
+CFLAGS	makefile	/^CFLAGS=-g -Wall$/;"	m
+ID_RESOURE_1	manager.h	15;"	d
+ID_RESOURE_2	manager.h	16;"	d
+ID_RESOURE_3	manager.h	17;"	d
+ID_RESOURE_4	manager.h	18;"	d
+NUM_RESOURE_1	manager.h	19;"	d
+NUM_RESOURE_2	manager.h	20;"	d
+NUM_RESOURE_3	manager.h	21;"	d
+NUM_RESOURE_4	manager.h	22;"	d
+PRIORITY_INIT	manager.h	10;"	d
+PRIORITY_SYSTEM	manager.h	12;"	d
+PRIORITY_USER	manager.h	11;"	d
+STATUS_BLOCKED	manager.h	7;"	d
+STATUS_READY	manager.h	5;"	d
+STATUS_RUNNING	manager.h	6;"	d
+base_id	shell.c	/^static int base_id;             \/\/ the available process id for creating process in system$/;"	v	file:
+bl	manager.h	/^pcb_t *bl;            \/\/ the blocked list of system$/;"	v
+bl_next	manager.h	/^    pcb_t *bl_next;                         \/\/ the next pointer for process in the blocked list$/;"	m	struct:pcb
+buf_size	shell.c	/^static int buf_size;            \/\/ the size of p_id_to_name map $/;"	v	file:
+child	manager.h	/^    pcb_t **child;                          \/\/ the child process list$/;"	m	struct:creation_tree
+cl_next	manager.h	/^    pcb_t *cl_next;                         \/\/ the next pointer for process in the child list$/;"	m	struct:pcb
+cr	shell.c	/^static void cr(char **args) {$/;"	f	file:
+create	manager.c	/^pcb_t *create(int id, int priority) {$/;"	f
+creation_tree	manager.h	/^    creation_tree_t *creation_tree;         \/\/ the pointers to parent process and child process list$/;"	m	struct:pcb
+creation_tree	manager.h	/^struct creation_tree {$/;"	s
+creation_tree_t	manager.h	/^typedef struct creation_tree creation_tree_t;$/;"	t	typeref:struct:creation_tree
+de	shell.c	/^static void de(char **args) {$/;"	f	file:
+delete_pcb	manager.c	/^void delete_pcb(pcb_t *p) {$/;"	f
+delete_re_l_node	manager.c	/^void delete_re_l_node(re_l_node_t *re_l_node) {$/;"	f
+delete_wa_l_node	manager.c	/^void delete_wa_l_node(wa_l_node_t *wa_l_node) {$/;"	f
+destroy	manager.c	/^void destroy(int id) {$/;"	f
+execute_cmd	shell.c	/^static void execute_cmd(char **args) {$/;"	f	file:
+get_new_pcb	manager.c	/^pcb_t *get_new_pcb() {$/;"	f
+get_new_re_l_node	manager.c	/^re_l_node_t *get_new_re_l_node() {$/;"	f
+get_new_wa_l_node	manager.c	/^wa_l_node_t *get_new_wa_l_node() {$/;"	f
+get_pcb	manager.c	/^pcb_t *get_pcb(int id) {$/;"	f
+get_rcb	manager.c	/^rcb_t *get_rcb(int id) {$/;"	f
+help	shell.c	/^static void help() {$/;"	f	file:
+id	manager.h	/^    int id;                                 \/\/ the unique identifier of resoure$/;"	m	struct:rcb
+id	manager.h	/^    int id;                                 \/\/ the unique process identifier$/;"	m	struct:pcb
+in	shell.c	/^static FILE *in;                \/\/ input file stream: from stdin or from file.$/;"	v	file:
+init	manager.c	/^void init() {$/;"	f
+init_resouces	manager.c	/^static void init_resouces() {$/;"	f	file:
+insert_into_blocked_list	manager.c	/^void insert_into_blocked_list(pcb_t **bl, pcb_t *p) {$/;"	f
+insert_into_child_list	manager.c	/^void insert_into_child_list(pcb_t **cl, pcb_t *p) {$/;"	f
+insert_into_head_of_ready_list	manager.c	/^static void insert_into_head_of_ready_list(pcb_t **rl, pcb_t *p) {$/;"	f	file:
+insert_into_ready_list	manager.c	/^void insert_into_ready_list(pcb_t **rl, pcb_t *p) {$/;"	f
+insert_into_resource_list	manager.c	/^void insert_into_resource_list(re_l_node_t **re_l, rcb_t *r, int n) {$/;"	f
+insert_into_waiting_list	manager.c	/^void insert_into_waiting_list(wa_l_node_t **wa_l, pcb_t *p, int n) {$/;"	f
+interrupt	manager.c	/^void interrupt() {$/;"	f
+it	shell.c	/^static void it(char **args) {$/;"	f	file:
+k	manager.h	/^    int k;                                  \/\/ the initial number of resoure$/;"	m	struct:resource_status
+kill_tree	manager.c	/^static void kill_tree(pcb_t *p) {$/;"	f	file:
+list	manager.h	/^    pcb_t **list;                           \/\/ the list process belong to: BL or RL$/;"	m	struct:process_status
+list	shell.c	/^static void list(char **args) {$/;"	f	file:
+main	shell.c	/^int main(int argc, char *argv[]) {$/;"	f
+manager_h	manager.h	2;"	d
+n	manager.h	/^    int n;                                  \/\/ the number of the request resoure$/;"	m	struct:wa_l_node
+n	manager.h	/^    int n;                                  \/\/ the numebr of the resoure$/;"	m	struct:re_l_node
+next	manager.h	/^    re_l_node_t *next;$/;"	m	struct:re_l_node
+next	manager.h	/^    wa_l_node_t *next;$/;"	m	struct:wa_l_node
+p	manager.h	/^    pcb_t *p;                               \/\/ the pcb$/;"	m	struct:wa_l_node
+p_id_to_name	shell.c	/^static char **p_id_to_name;     \/\/ map from process id to process name$/;"	v	file:
+parent	manager.h	/^    pcb_t *parent;                          \/\/ the parent process$/;"	m	struct:creation_tree
+pcb	manager.h	/^struct pcb {$/;"	s
+pcb_t	manager.h	/^typedef struct pcb pcb_t;$/;"	t	typeref:struct:pcb
+pr	shell.c	/^static void pr(char **args) {$/;"	f	file:
+preempt	manager.c	/^static pcb_t *preempt(pcb_t *new_pcb, pcb_t *old_pcb) {$/;"	f	file:
+priority	manager.h	/^    int priority;$/;"	m	struct:pcb
+process_init	manager.h	/^pcb_t *process_init;         \/\/ the init process always be running or ready$/;"	v
+process_status	manager.h	/^struct process_status {$/;"	s
+process_status_t	manager.h	/^typedef struct process_status process_status_t;$/;"	t	typeref:struct:process_status
+r	manager.h	/^    rcb_t *r;                               \/\/ the rcb$/;"	m	struct:re_l_node
+rcb	manager.h	/^struct rcb {$/;"	s
+rcb_t	manager.h	/^typedef struct rcb rcb_t;$/;"	t	typeref:struct:rcb
+re_l_node	manager.h	/^struct re_l_node {$/;"	s
+re_l_node_t	manager.h	/^typedef struct re_l_node re_l_node_t;$/;"	t	typeref:struct:re_l_node
+read_line	shell.c	/^static char *read_line() {$/;"	f	file:
+rel	shell.c	/^static void rel(char **args) {$/;"	f	file:
+release	manager.c	/^void release(int id, int n) {$/;"	f
+release_all	manager.c	/^static void release_all(pcb_t *p) {$/;"	f	file:
+remove_from_blocked_list	manager.c	/^void remove_from_blocked_list(pcb_t **bl, pcb_t *p) {$/;"	f
+remove_from_child_list	manager.c	/^void remove_from_child_list(pcb_t **cl, pcb_t *p) {$/;"	f
+remove_from_ready_list	manager.c	/^void remove_from_ready_list(pcb_t **rl, pcb_t *p) {$/;"	f
+remove_from_resource_list	manager.c	/^void remove_from_resource_list(re_l_node_t **re_l, rcb_t *r, int n) {$/;"	f
+remove_from_waiting_list	manager.c	/^void remove_from_waiting_list(wa_l_node_t **wa_l, pcb_t *p) {$/;"	f
+req	shell.c	/^static void req(char **args) {$/;"	f	file:
+request	manager.c	/^void request(int id, int n) {$/;"	f
+resource_1	manager.h	/^rcb_t *resource_1;$/;"	v
+resource_2	manager.h	/^rcb_t *resource_2;$/;"	v
+resource_3	manager.h	/^rcb_t *resource_3;$/;"	v
+resource_4	manager.h	/^rcb_t *resource_4;$/;"	v
+resource_list	manager.h	/^    re_l_node_t  **resource_list;           \/\/ the resource list  $/;"	m	struct:pcb
+resource_status	manager.h	/^struct resource_status {$/;"	s
+resource_status_t	manager.h	/^typedef struct resource_status resource_status_t;$/;"	t	typeref:struct:resource_status
+rl	manager.h	/^pcb_t *rl;            \/\/ the ready list of system$/;"	v
+rl_next	manager.h	/^    pcb_t *rl_next;                         \/\/ the next pointer for process in the ready list$/;"	m	struct:pcb
+run_loop	shell.c	/^static void run_loop() {$/;"	f	file:
+scheduler	manager.c	/^void scheduler() {$/;"	f
+search_creation_tree	manager.c	/^static void search_creation_tree(int id, pcb_t *cur, pcb_t **ret) {$/;"	f	file:
+self	manager.h	/^pcb_t *self;          \/\/ the currently running process$/;"	v
+split_line	shell.c	/^static char **split_line(char *line) {$/;"	f	file:
+status	manager.h	/^    process_status_t *status;               \/\/ the process status $/;"	m	struct:pcb
+status	manager.h	/^    resource_status_t *status;              \/\/ the status of the resource$/;"	m	struct:rcb
+to	shell.c	/^static void to(char **args) {$/;"	f	file:
+type	manager.h	/^    int type;                               \/\/ the process status: ready, run and block$/;"	m	struct:process_status
+u	manager.h	/^    int u;                                  \/\/ the available number of resoure$/;"	m	struct:resource_status
+wa_l_node	manager.h	/^struct wa_l_node {$/;"	s
+wa_l_node_t	manager.h	/^typedef struct wa_l_node wa_l_node_t;$/;"	t	typeref:struct:wa_l_node
+waiting_list	manager.h	/^    wa_l_node_t **waiting_list;             \/\/ the list of blocked process$/;"	m	struct:rcb

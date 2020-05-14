@@ -7,22 +7,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "manager.h"
 
 #define BUFSIZE 16
 
-static FILE *in;
-
-static int buf_size;
-static int base_id;
-static char **p_id_to_name;
-
+static FILE *in;                // input file stream: from stdin or from file.
+static int buf_size;            // the size of p_id_to_name map 
+static int base_id;             // the available process id for creating process in system
+static char **p_id_to_name;     // map from process id to process name
+// functions for running shell
 static void run_loop();
 static char *read_line();
 static char **split_line(char *);
 static void execute_cmd(char **);
-
+// functions for executing command
 static void it(char **);
 static void cr(char **);
 static void de(char **);
@@ -34,162 +32,136 @@ static void pr(char **);
 static void help();
 
 /*
- * it - handle command (init)
- *      - initilize the process and resource manager
+ * it - init
+ *      - initilize the basic process and resource manager
  */
 static void it(char **args) {
-    /*printf("%p\n", args);*/
-    /*while (1);*/
     if (args[1] == NULL) {
-        init();
-
-        buf_size = BUFSIZE;
-        p_id_to_name = malloc (BUFSIZE * sizeof(char *));
+        init();         // run
+        buf_size = BUFSIZE; 
+        p_id_to_name = malloc (BUFSIZE * sizeof(char *));   // initalize pid_to_pname map
         p_id_to_name[process_init->id] = strdup("init"); 
-        base_id = process_init->id + 1;
-
+        base_id = process_init->id + 1;     // update base_id
         printf("the process and resource manager is initilized\n");
-        printf("*init process is running\n");
+        printf("init process is running\n");
     } else {
         fprintf(stderr, "Usage: %s\n", args[0]);
     }
 }
 
 /*
- * cr - handle command (cr)
- *      - create a new process
+ * cr - cr <process name> <priority>
+ *      - create a new process with corresponding priority
  */
 static void cr(char **args) {
     if (args[1] == NULL || args[2] == NULL || args[3] != NULL) {
         fprintf(stderr, "Usage: %s <process name> <priority>\n", args[0]);
     } else {
-        char *name = args[1]; 
-        // the process name is unique just like id
-        for (int i = 2; i < base_id; i++) {
+        for (int i = 2; i < base_id; i++) { // check if unique
             if (p_id_to_name[i] == NULL) continue;
-            if (strcmp(name, p_id_to_name[i]) == 0) {
-                fprintf(stderr, "create process error\n");
-                /*fprintf(stderr, "process name does exist\n");*/
+            if (strcmp(args[1], p_id_to_name[i]) == 0) {
+                fprintf(stderr, "process name is existed\n");
                 return;
             }
         }
         int priority = atoi(args[2]);
-        if (base_id >= buf_size) {      // expand capacity
+        if (base_id >= buf_size) {      // expand capacity of map
             buf_size *= 2;
             p_id_to_name = realloc(p_id_to_name, buf_size);
         }
-
-        create(base_id, priority);
-
-        p_id_to_name[base_id++] = strdup(name);  
-        printf("process %s is created\n", name);
+        create(base_id, priority);  // run
+        p_id_to_name[base_id++] = strdup(args[1]);  
+        printf("process %s is created\n", args[1]);
         printf("process %s is running\n", p_id_to_name[self->id]);
     }
 }
 
 /* 
- * de - handle command (de) 
+ * de - de <process name>  
  *      - delete the target process
  */
 static void de(char **args) {
     if (args[1] == NULL || args[2] != NULL) {
         fprintf(stderr, "Usage: %s <process name>\n", args[0]);
     } else {
-        char *name = args[1];
         if (base_id >= buf_size) {      // expand capacity
             buf_size += buf_size;
             p_id_to_name = realloc(p_id_to_name, buf_size);
         }
-
-        for (int i = 2; i < base_id; i++) {
+        for (int i = 2; i < base_id; i++) {     // search for target process
             if (p_id_to_name[i] == NULL) continue;
-
-            if (strcmp(name, p_id_to_name[i]) == 0) {
-                destroy(i);
+            if (strcmp(args[1], p_id_to_name[i]) == 0) {
+                destroy(i);     // run
                 p_id_to_name[i] = NULL; 
-                printf("process %s is deleted\n", name);
+                printf("process %s is deleted\n", args[1]);
                 printf("process %s is running\n", p_id_to_name[self->id]);
                 return;
             }
         }
-        fprintf(stderr, "destroy process error\n");
+        fprintf(stderr, "process %s is not exist\n", args[1]);
     }
 }
 
 /*
- * req - handle command (req)
+ * req - req <resource name> <request number>
  *      - currently running process request a certain number of resources
  */
 static void req(char **args) {
     if (args[1] == NULL || args[3] != NULL) {
         fprintf(stderr, "Usage: %s <resource name> <# of units>\n", args[0]);
     } else {
-        char *name = args[1];
         int num;
         char *before = p_id_to_name[self->id];
-
         if (args[2] == NULL) num = 1;
         else num = atoi(args[2]);
-    
-        if (strcmp(name, "R1") == 0) {
-            request(ID_RESOURE_1, num);
-        } else if (strcmp(name, "R2") == 0) {
+        if (strcmp(args[1], "R1") == 0) {
+            request(ID_RESOURE_1, num);         // run
+        } else if (strcmp(args[1], "R2") == 0) {
             request(ID_RESOURE_2, num);
-        } else if (strcmp(name, "R3") == 0) {
+        } else if (strcmp(args[1], "R3") == 0) {
             request(ID_RESOURE_3, num);
-        } else if (strcmp(name, "R4") == 0) {
+        } else if (strcmp(args[1], "R4") == 0) {
             request(ID_RESOURE_4, num);
         } else {
-            fprintf(stderr, "request resource error\n");
+            fprintf(stderr, "the resource %s is not exist\n", args[1]);
             return;
         }
-
-        printf("process %s request resource %d %s\n", before, num, name);
-        if (strcmp(before, p_id_to_name[self->id]) != 0) {
+        printf("process %s request resource %d %s\n", before, num, args[1]);
+        if (strcmp(before, p_id_to_name[self->id]) != 0) {  // blocked 
             printf("process %s is running, process %s is blocked\n", p_id_to_name[self->id], before);
         }
     }
 }
 
 /*
- * rel - handle command (rel)
+ * rel - rel <resource name> <release number>
  *      - currently running process release a certain number of resources
  */
 static void rel(char **args) {
     if (args[1] == NULL || args[3] != NULL) {
         fprintf(stderr, "Usage: %s <resource name> <# of units>\n", args[0]);
     } else {
-        char *name = args[1];
         int num;
         if (args[2] == NULL) num = 1;
         else num = atoi(args[2]);
-
-        if (strcmp(name, "R1") == 0) {
-
+        if (strcmp(args[1], "R1") == 0) {
             release(ID_RESOURE_1, num);
-
-        } else if (strcmp(name, "R2") == 0) {
-
+        } else if (strcmp(args[1], "R2") == 0) {
             release(ID_RESOURE_2, num);
-
-        } else if (strcmp(name, "R3") == 0) {
-
+        } else if (strcmp(args[1], "R3") == 0) {
             release(ID_RESOURE_3, num);
-
-        } else if (strcmp(name, "R4") == 0) {
-
+        } else if (strcmp(args[1], "R4") == 0) {
             release(ID_RESOURE_4, num);
         } else {
-            
-            fprintf(stderr, "release resource error\n");
+            fprintf(stderr, "the resource %s is not exist\n", args[1]);
             return;
         }
-        printf("process %s release resource %d %s\n", p_id_to_name[self->id], num, name);
+        printf("process %s release resource %d %s\n", p_id_to_name[self->id], num, args[1]);
     }
 }
 
 /*
- * to - handle command (to)
+ * to - to
  *      - time-out interrupt
  *
  */
@@ -198,27 +170,23 @@ static void to(char **args) {
         fprintf(stderr, "Usage: %s\n", args[0]);
     } else {
         printf("process %s is ready\n", p_id_to_name[self->id]);
-        
-        interrupt();
-
+        interrupt();        // run
         printf("process %s is running\n", p_id_to_name[self->id]);
     }
 }
 
 /*
- * list - handle command (list list)
- *              - present all processes in ready list.
+ * list - list (ready, block, res)
+ *              - present the process list.
  */
 static void list(char **args) {
-    char *name = args[1];
-    if (name == NULL || args[2] != NULL) {
+    if (args[1] == NULL || args[2] != NULL) {
         fprintf(stderr, "Usage: list <ready,block,res>\n");
         return;
     }
-
-    if (strcmp(name, "ready") == 0) {
+    // ready list
+    if (strcmp(args[1], "ready") == 0) {
         pcb_t *tmp;
-
         printf("ready list with priority %d:", PRIORITY_SYSTEM);
         tmp = rl;
         while (tmp != NULL) {
@@ -228,7 +196,6 @@ static void list(char **args) {
             tmp = tmp->rl_next;
         }
         printf("\n");
-       
         printf("ready list with priority %d:", PRIORITY_USER);
         tmp = rl;
         while (tmp != NULL) {
@@ -238,7 +205,6 @@ static void list(char **args) {
             tmp = tmp->rl_next;
         }
         printf("\n");
-        
         printf("ready list with priority %d:", PRIORITY_INIT);
         tmp = rl;
         while (tmp != NULL) {
@@ -248,10 +214,10 @@ static void list(char **args) {
             tmp = tmp->rl_next;
         }
         printf("\n");
-
-    } else if (strcmp(name, "block") == 0) {
+    } 
+    // block list
+    else if (strcmp(args[1], "block") == 0) {
         wa_l_node_t *tmp;
-
         printf("process blocked in resource R1:");
         tmp = *get_rcb(ID_RESOURE_1)->waiting_list;
         while (tmp != NULL) {
@@ -259,7 +225,6 @@ static void list(char **args) {
             tmp = tmp->next;
         }
         printf("\n");
-        
         printf("process blocked in resource R2:");
         tmp = *get_rcb(ID_RESOURE_2)->waiting_list;
         while (tmp != NULL) {
@@ -267,7 +232,6 @@ static void list(char **args) {
             tmp = tmp->next;
         }
         printf("\n");
-        
         printf("process blocked in resource R3:");
         tmp = *get_rcb(ID_RESOURE_3)->waiting_list;
         while (tmp != NULL) {
@@ -275,7 +239,6 @@ static void list(char **args) {
             tmp = tmp->next;
         }
         printf("\n");
-        
         printf("process blocked in resource R4:");
         tmp = *get_rcb(ID_RESOURE_4)->waiting_list;
         while (tmp != NULL) {
@@ -283,99 +246,80 @@ static void list(char **args) {
             tmp = tmp->next;
         }
         printf("\n");
-        
-    } else if (strcmp(name, "res") == 0) {
-
+    }
+    // resource list
+    else if (strcmp(args[1], "res") == 0) {
         printf("resource R1 remain: %d\n", get_rcb(ID_RESOURE_1)->status->u);
         printf("resource R2 remain: %d\n", get_rcb(ID_RESOURE_2)->status->u);
         printf("resource R3 remain: %d\n", get_rcb(ID_RESOURE_3)->status->u);
         printf("resource R4 remain: %d\n", get_rcb(ID_RESOURE_4)->status->u);
-
     } else {
-
         fprintf(stderr, "Usage: list <ready,block,res>\n");
     }
 }
 
 
 /*
- * pr - handle command (pr)
+ * pr - pr <process name>
  *      - to present the pcb informantion about the process
  */
 static void pr(char **args) {
     if (args[1] == NULL || args[2] != NULL) {
         fprintf(stderr, "Usage: %s <process name>\n", args[0]);
     }
-    char *name = args[1];
     pcb_t *p;
-    for (int i = 1; i < base_id; i++) {
+    for (int i = 1; i < base_id; i++) {     // search for the target process 
         if (p_id_to_name[i] == NULL) continue;
-        if (strcmp(name, p_id_to_name[i]) == 0) {
+        if (strcmp(args[1], p_id_to_name[i]) == 0) {
             p = get_pcb(i);
             break;
         }
     } 
     if (p == NULL) {
-        fprintf(stderr, "print pcb informantion error\n");
+        fprintf(stderr, "process %s is not exist\n", args[1]);
         return;
     }
-
     // print name 
     printf("process name: %s\n", p_id_to_name[p->id]);
-    
     // print id 
     printf("process id: %d\n", p->id);
-
     // print priority
-
+    printf("process priority: %d\n", p->priority);
     // print resources
-    
-    // print status 
-    
-    // print parent 
-    
-
-    // print child
-}
-
-
-
-
-
-
-static void run_loop() {
-    char *line;
-    char **args; 
-
-    while (1) {
-        if (in == stdin)
-            printf("shell> ");
-
-        // read line 
-        line = read_line();
-        if (line == NULL) continue;
-
-        // split line
-        args = split_line(line);
-        if (args == NULL) continue;
-        /*printf("%p\n", args);*/
-        /*printf("%s\n", args[0]);*/
-        /*printf("%s\n", args[1]);*/
-        /*while(1); */
-        // execute command
-        execute_cmd(args);
-
-        free(line);
-        free(args);
+    re_l_node_t *tmp = *(p->resource_list);
+    while (tmp != NULL) {
+        printf("process hold resource R%d\n", tmp->r->id); 
+        tmp = tmp->next;
     }
+    // print status 
+    printf("process status: ");
+    if (p->status->type == STATUS_BLOCKED) {
+        printf("BLOCKED\n"); 
+    } else if (p->status->type == STATUS_READY) {
+        printf("READY\n");
+    } else if (p->status->type == STATUS_RUNNING){
+        printf("RUNNING\n");
+    }
+    // print parent 
+    if (p != process_init) printf("parent process: %s\n", p_id_to_name[p->creation_tree->parent->id]);
+    // print child
+    pcb_t *child = *(p->creation_tree->child);
+    printf("child processes: ");
+    while (child != NULL) {
+        printf("- %s", p_id_to_name[child->id]); 
+    }
+    printf("\n");
 }
 
 
+
+/* 
+ * read_line - read a line at once from input stream
+ */
 static char *read_line() {
     char *line = NULL;
     size_t bufsize = 0;
     ssize_t len = 0; 
-
     if ( (len = getline(&line, &bufsize, in)) == -1) {
         if (feof(in)) {
             exit(EXIT_SUCCESS);
@@ -386,28 +330,29 @@ static char *read_line() {
     }
     if (line == NULL || len == 1) return NULL;
     else if (line[len - 1] == '\n') line[len - 1] = '\0';
-
     return line;
 }
 
+/*
+ * split_line - split line to tokens which contains arguments of command.
+ */
 static char **split_line(char *line) {
     char *stringp = line;
     int position = 0;
     char **tokens = malloc(BUFSIZE * sizeof(char *));
     char *token;
-
     while ( (token = strsep(&stringp, " ")) != NULL ) {
         tokens[position++] = token;
     } 
     tokens[position] = NULL;
-
     return tokens;
 }
 
+/*
+ * execute_cmd - used for invoke manager routines and print some information.
+ */
 static void execute_cmd(char **args) {
-    
     if (args[0] == NULL) return;
-
     if (strcmp(args[0], "init") == 0) {
         char **tmp = malloc(BUFSIZE * sizeof(char *));
         it(tmp);
@@ -434,7 +379,9 @@ static void execute_cmd(char **args) {
     }
 }
 
-
+/*
+ * help - print some help information
+ */
 static void help() {
     // print help information
     printf("commands of presentation shell:\n");
@@ -448,13 +395,41 @@ static void help() {
     printf("- list block                        // list all process in blocked list\n");
     printf("- list res                          // list all available resources\n");
     printf("- pr <process name>                 // print pcb information about a given process\n");
+    printf("- exit                              // exit the presentation shell\n");
     printf("note: the argument <# of units> is optional, the default is 1\n");
 }
 
 
+/*
+ * run_loop - the structure of the working shell.
+ */
+static void run_loop() {
+    char *line;
+    char **args; 
+    while (1) {
+        if (in == stdin)
+            printf("shell> ");
+        // read line 
+        line = read_line();
+        if (line == NULL) continue;
+        // split line
+        args = split_line(line);
+        if (args == NULL) continue;
+       // execute command
+        execute_cmd(args);
+        free(line);
+        free(args);
+    }
+}
 
+
+
+/*
+ *
+ * the entrance of program
+ *
+ */
 int main(int argc, char *argv[]) {
-    
     // handle input stream
     if (argc == 1) {
         // from stdin
@@ -469,9 +444,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: ./shell <input file>(optional)\n");
         exit(EXIT_FAILURE);
     }
-     
     // run command loop
     run_loop();
-
     exit(EXIT_SUCCESS);
 }

@@ -3,12 +3,10 @@
 
 #include "manager.h"
 
-
 static void search_creation_tree(int id, pcb_t *cur, pcb_t **target);
 static void kill_tree(pcb_t *p);
 static pcb_t *preempt(pcb_t *new_pcb, pcb_t *old_pcb);
 static void insert_into_head_of_ready_list(pcb_t **rl, pcb_t *p);
-
 static void release_all(pcb_t *p);
 
 pcb_t *get_new_pcb() {
@@ -43,10 +41,8 @@ void delete_wa_l_node(wa_l_node_t *wa_l_node) {
  */
 pcb_t *get_pcb(int id) {
     pcb_t *ret = NULL;
-   
     // search the creation tree from the init process
     search_creation_tree(id, process_init,  &ret);
-
     return ret;
 }
 
@@ -61,7 +57,6 @@ static void search_creation_tree(int id, pcb_t *cur, pcb_t **ret) {
         *ret = cur;         // search succeed
         return;
     }
-
     pcb_t *tmp = *(cur->creation_tree->child);
     while (tmp != NULL) {
         search_creation_tree(id, tmp, ret);
@@ -78,7 +73,6 @@ static void init_resouces() {
     resource_1->status->k = NUM_RESOURE_1;
     resource_1->status->u = NUM_RESOURE_1;
     resource_1->waiting_list = calloc(1, sizeof(wa_l_node_t *));
-
     // init resource 2
     resource_2 = (rcb_t *) malloc(sizeof(rcb_t));
     resource_2->id = ID_RESOURE_2;
@@ -86,7 +80,6 @@ static void init_resouces() {
     resource_2->status->k = NUM_RESOURE_2;
     resource_2->status->u = NUM_RESOURE_2;
     resource_2->waiting_list = calloc(1, sizeof(wa_l_node_t *));
-
     // init resource 3
     resource_3 = (rcb_t *) malloc(sizeof(rcb_t));
     resource_3->id = ID_RESOURE_3;
@@ -94,7 +87,6 @@ static void init_resouces() {
     resource_3->status->k = NUM_RESOURE_3;
     resource_3->status->u = NUM_RESOURE_3;
     resource_3->waiting_list = calloc(1, sizeof(wa_l_node_t *));
-
     // init resource 4
     resource_4 = (rcb_t *) malloc(sizeof(rcb_t));
     resource_4->id = ID_RESOURE_4;
@@ -116,7 +108,6 @@ rcb_t *get_rcb(int id) {
         return resource_4;
     }
 }
-
 
 /*
  * request - currently running process request a certain numebr of resources
@@ -183,15 +174,12 @@ void release(int id, int n) {
  * init - create the process and resource manager
  */
 void init() {
-
     process_init = NULL;
     self = NULL;
     rl = NULL;
     bl = NULL;
-
     // init four kinds of resources
     init_resouces();
-
     // create the init process 
     process_init = create(1, 0);
 }
@@ -201,34 +189,25 @@ void init() {
  * create - create a new process 
  */
 pcb_t *create(int id, int priority) {
-
     // create a new pcb and initialize the pcb
     pcb_t *p = get_new_pcb();
-
     p->id = id;
-
     p->resource_list = calloc(1, sizeof(re_l_node_t *));
-
     p->status = (process_status_t *) malloc(sizeof(process_status_t));
     p->status->type = STATUS_READY;
     p->status->list = &rl;
-
     p->creation_tree = (creation_tree_t *) malloc(sizeof(creation_tree_t));
     p->creation_tree->parent = self;
     p->creation_tree->child = calloc(1, sizeof(pcb_t *));
-
     p->priority = priority;
-
     p->rl_next = NULL;
     p->bl_next = NULL;
     p->cl_next = NULL;
    
     // insert the process into the child list
     if (self != NULL) insert_into_child_list(self->creation_tree->child, p);    
-
     // insert the process into the ready list
     insert_into_ready_list(&rl, p);
-
     // schedule if needed
     scheduler();
 
@@ -243,27 +222,22 @@ void destroy(int id) {
     // get the target process
     pcb_t *p = get_pcb(id);
     if (p == NULL) return;    
-    
     // remove itself from the child list of its parent process
     remove_from_child_list(p->creation_tree->parent->creation_tree->child, p);
-
     // kill itself and all its descendants
     kill_tree(p);
-        
     // schedule if needed
     scheduler();
 }
 
 static void kill_tree(pcb_t *p) {
     if (p == NULL) return;
-
     // kill its descendants recursivly
     pcb_t *tmp = *(p->creation_tree->child); 
     while (tmp != NULL) {
         kill_tree(tmp);
         tmp = tmp->cl_next;
     }
-
     // remove itself from all possible list.
     if (p->status->type == STATUS_RUNNING) {
         interrupt();
@@ -272,10 +246,8 @@ static void kill_tree(pcb_t *p) {
     } else if (p->status->type == STATUS_BLOCKED) {
         remove_from_blocked_list(&bl, p);
     }
-
     // release all its resource
     release_all(p);
-
     // delete the pcb in memory
     delete_pcb(p); 
 }
@@ -312,7 +284,6 @@ static void release_all(pcb_t *p) {
  * scheduler 
  */
 void scheduler() {
-
     // get highest priority process
     pcb_t *p;
     if (self != NULL && rl->id == self->id) {   // self is in ready list
@@ -321,7 +292,6 @@ void scheduler() {
     } else {    // self is not in ready list
         p = rl;
     }
-
     // be preempted
     if ( self == NULL ||    // called from init or destroy 
             self->status->type != STATUS_RUNNING ||    // called from request or interrupt
@@ -330,7 +300,6 @@ void scheduler() {
 
         if (p != NULL) self = preempt(p, self);        // self is preempted by p
     } 
-
 }
 
 /*
@@ -362,17 +331,12 @@ static pcb_t *preempt(pcb_t *new_pcb, pcb_t *old_pcb) {
  *       currently running process:   running -> ready
  */
 void interrupt() {
-
-    /*remove_from_ready_list(&rl, self);*/
     self->status->type = STATUS_READY;
-    /*insert_into_ready_list(&rl, self);*/
-
     scheduler();
 }
 
 void insert_into_ready_list(pcb_t **rl, pcb_t *p) {
     if (p == NULL) return;
-
     if (*rl == NULL) {
         *rl = p;
     } else {
@@ -407,7 +371,6 @@ static void insert_into_head_of_ready_list(pcb_t **rl, pcb_t *p) {
 void remove_from_ready_list(pcb_t **rl, pcb_t *p) {
     if (p == NULL) return;
     if (*rl == NULL) return;
-
     // remove from the head of ready list.
     if (*rl == p) {
         *rl = (*rl)->rl_next;
@@ -425,7 +388,6 @@ void remove_from_ready_list(pcb_t **rl, pcb_t *p) {
 
 void insert_into_child_list(pcb_t **cl, pcb_t *p) {
     if (p == NULL) return;
-
     if (*cl == NULL) {
         *cl = p;
     } else {
@@ -441,7 +403,6 @@ void insert_into_child_list(pcb_t **cl, pcb_t *p) {
 void remove_from_child_list(pcb_t **cl, pcb_t *p) {
     if (p == NULL) return;
     if (cl == NULL) return;
-    
     pcb_t *tmp = *cl;
     // remove from the head of child list.
     if (tmp == p) {
@@ -460,7 +421,6 @@ void remove_from_child_list(pcb_t **cl, pcb_t *p) {
 
 void insert_into_blocked_list(pcb_t **bl, pcb_t *p) {
     if (p == NULL) return;
-
     if (*bl == NULL) {
         *bl = p;
     } else {
@@ -476,7 +436,6 @@ void insert_into_blocked_list(pcb_t **bl, pcb_t *p) {
 void remove_from_blocked_list(pcb_t **bl, pcb_t *p) {
     if (p == NULL) return;
     if (*bl == NULL) return;
-
     // remove from the head of blocked list.
     if (*bl == p) {
         *bl = (*bl)->bl_next;
@@ -495,12 +454,10 @@ void remove_from_blocked_list(pcb_t **bl, pcb_t *p) {
 
 void insert_into_waiting_list(wa_l_node_t **wa_l, pcb_t *p, int n) {
     if (p == NULL) return;
-    
     wa_l_node_t *node_to_insert = get_new_wa_l_node();
     node_to_insert->p = p;
     node_to_insert->n = n;
     node_to_insert->next = NULL;
-
     if (*wa_l == NULL) {
         *wa_l = node_to_insert; 
     } else {
@@ -514,7 +471,6 @@ void insert_into_waiting_list(wa_l_node_t **wa_l, pcb_t *p, int n) {
 void remove_from_waiting_list(wa_l_node_t **wa_l, pcb_t *p) {
     if (p == NULL) return;
     if (*wa_l == NULL) return;
-
     wa_l_node_t *tmp = *wa_l;
     if (tmp->p == p) {          // remove from the head
         *wa_l = tmp->next;
@@ -537,13 +493,11 @@ void remove_from_waiting_list(wa_l_node_t **wa_l, pcb_t *p) {
  */
 void insert_into_resource_list(re_l_node_t **re_l, rcb_t *r, int n) {
     if (r == NULL) return;
-    
     // create and initialize new node in resource list
     re_l_node_t *node_to_insert = get_new_re_l_node();
     node_to_insert->r = r;
     node_to_insert->n = n;
     node_to_insert->next = NULL;
-
     if (*re_l == NULL) {
         *re_l = node_to_insert ;
     } else {
@@ -565,7 +519,6 @@ void insert_into_resource_list(re_l_node_t **re_l, rcb_t *r, int n) {
 void remove_from_resource_list(re_l_node_t **re_l, rcb_t *r, int n) {
     if (r == NULL) return;
     if (*re_l == NULL) return;
-
     re_l_node_t *tmp = *re_l;
     if (tmp->r == r) {          // remove from the head
         *re_l = tmp->next;
